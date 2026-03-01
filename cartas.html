@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COLECCIÓN DE CARTAS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --card-width: 280px;
+            --card-height: 400px;
+            --gold: #d4af37;
+            --gold-light: #f4e4ba;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+            --rare-purple: #8b5cf6;
+            --epic-pink: #ec4899;
+            --legendary-orange: #f97316;
+            --dark-bg: #0a0a0f;
+            --card-bg: #12121a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--dark-bg);
+            min-height: 100vh;
+            font-family: 'Playfair Display', serif;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 80%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: #888;
+            font-style: italic;
+        }
+
+        .collection-count {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .count-item {
+            text-align: center;
+        }
+
+        .count-value {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--gold-light), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .count-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: #666;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
+            gap: 2rem;
+            justify-items: center;
+        }
+
+        .card {
+            width: var(--card-width);
+            height: var(--card-height);
+            position: relative;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card:hover .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .card-front {
+            background: var(--card-bg);
+            border: 2px solid var(--gold);
+            box-shadow: 
+                0 0 30px rgba(212, 175, 55, 0.2),
+                inset 0 0 60px rgba(212, 175, 55, 0.05);
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #1a1a24, #12121a);
+            border: 2px solid var(--gold);
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .card-shine {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                135deg,
+                transparent 40%,
+                rgba(255, 255, 255, 0.1) 50%,
+                transparent 60%
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .card-foil {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                135deg,
+                rgba(212, 175, 55, 0.3) 0%,
+                rgba(255, 255, 255, 0.2) 25%,
+                rgba(212, 175, 55, 0.3) 50%,
+                rgba(255, 255, 255, 0.2) 75%,
+                rgba(212, 175, 55, 0.3) 100%
+            );
+            opacity: 0.5;
+            mix-blend-mode: overlay;
+            pointer-events: none;
+        }
+
+        .card-corner {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--gold);
+            z-index: 5;
+        }
+
+        .card-corner.tl { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+        .card-corner.tr { top: 10px; right: 10px; border-left: none; border-bottom: none; }
+        .card-corner.bl { bottom: 10px; left: 10px; border-right: none; border-top: none; }
+        .card-corner.br { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+
+        .card-rarity {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            padding: 0.25rem 0.75rem;
+            border: 1px solid;
+            z-index: 5;
+        }
+
+        .card-rarity.common { color: var(--silver); border-color: var(--silver); }
+        .card-rarity.rare { color: var(--rare-purple); border-color: var(--rare-purple); }
+        .card-rarity.epic { color: var(--epic-pink); border-color: var(--epic-pink); }
+        .card-rarity.legendary { color: var(--legendary-orange); border-color: var(--legendary-orange); }
+
+        .card-number {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            color: var(--gold);
+            z-index: 5;
+        }
+
+        .card-art {
+            width: 100%;
+            height: 55%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-art-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.3;
+        }
+
+        .card-icon {
+            font-size: 5rem;
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 0 20px currentColor);
+        }
+
+        .card-content {
+            padding: 1rem 1.5rem;
+        }
+
+        .card-name {
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.1em;
+        }
+
+        .card-level {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .card-stats {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .card-stat {
+            text-align: center;
+        }
+
+        .card-stat-value {
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .card-stat-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #666;
+        }
+
+        .card-back-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--gold);
+        }
+
+        .card-back-desc {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #aaa;
+            font-style: italic;
+        }
+
+        .card-back-stats {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .back-stat {
+            text-align: center;
+        }
+
+        .back-stat-value {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            color: var(--gold-light);
+        }
+
+        .back-stat-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #666;
+        }
+
+        .card-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200px;
+            height: 200px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, var(--gold) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+
+        .card:hover .card-glow {
+            opacity: 0.3;
+        }
+
+        .reveal-animation {
+            animation: cardReveal 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes cardReveal {
+            0% {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .card.common .card-front { border-color: var(--silver); }
+        .card.common .card-glow { background: radial-gradient(circle, var(--silver) 0%, transparent 70%); }
+        
+        .card.rare .card-front { border-color: var(--rare-purple); box-shadow: 0 0 30px rgba(139, 92, 246, 0.3); }
+        .card.rare .card-glow { background: radial-gradient(circle, var(--rare-purple) 0%, transparent 70%); }
+        
+        .card.epic .card-front { border-color: var(--epic-pink); box-shadow: 0 0 30px rgba(236, 72, 153, 0.3); }
+        .card.epic .card-glow { background: radial-gradient(circle, var(--epic-pink) 0%, transparent 70%); }
+        
+        .card.legendary .card-front { 
+            border-color: var(--legendary-orange); 
+            box-shadow: 0 0 40px rgba(249, 115, 22, 0.4);
+            animation: legendaryPulse 3s ease-in-out infinite;
+        }
+        .card.legendary .card-glow { background: radial-gradient(circle, var(--legendary-orange) 0%, transparent 70%); }
+
+        @keyframes legendaryPulse {
+            0%, 100% { box-shadow: 0 0 40px rgba(249, 115, 22, 0.4); }
+            50% { box-shadow: 0 0 60px rgba(249, 115, 22, 0.6); }
+        }
+
+        .deck-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .deck-icon {
+            width: 60px;
+            height: 80px;
+            background: linear-gradient(145deg, #1a1a24, #0a0a0f);
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .deck-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px var(--gold);
+        }
+
+        .deck-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #666;
+        }
+
+        @media (max-width: 600px) {
+            :root {
+                --card-width: 240px;
+                --card-height: 340px;
+            }
+            
+            .cards-grid {
+                gap: 1.5rem;
+            }
+            
+            .deck-container {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+
+    <div class="container">
+        <header class="header">
+            <h1>✦ COLECCIÓN PREMIUM ✦</h1>
+            <p>Tus habilidades, tu tesoro</p>
+        </header>
+
+        <div class="collection-count">
+            <div class="count-item">
+                <div class="count-value" id="totalCards">8</div>
+                <div class="count-label">Cartas</div>
+            </div>
+            <div class="count-item">
+                <div class="count-value" id="avgPower">0</div>
+                <div class="count-label">Poder Promedio</div>
+            </div>
+            <div class="count-item">
+                <div class="count-value" id="totalXP">0</div>
+                <div class="count-label">XP Total</div>
+            </div>
+        </div>
+
+        <div class="cards-grid" id="cardsGrid"></div>
+    </div>
+
+    <div class="deck-container">
+        <div class="deck-icon">🎴</div>
+        <span class="deck-label">Mazo</span>
+    </div>
+
+    <script>
+        const skills = [
+            { id: 1, name: "JAVASCRIPT", icon: "⚡", level: 85, xp: 8500, rarity: "epic", color: "#ffd700", description: "El rayo que ilumina la web. Dinamico y versatil, el corazon pulsante de la internet moderna." },
+            { id: 2, name: "REACT", icon: "⚛️", level: 78, xp: 7800, rarity: "rare", color: "#7eb8da", description: "Arquitectura cristalina del UI. Componentes que fluyen como agua." },
+            { id: 3, name: "PYTHON", icon: "🐍", level: 72, xp: 7200, rarity: "rare", color: "#ff8c42", description: "La serpiente primigenia. Versatilidad que abarca desde datos hasta sabiduria artificial." },
+            { id: 4, name: "CSS/HTML", icon: "🎨", level: 92, xp: 9200, rarity: "legendary", color: "#ff6b9d", description: "El arte divino del diseno. Donde la creatividad encuentra su lien." },
+            { id: 5, name: "NODE.JS", icon: "🟢", level: 68, xp: 6800, rarity: "common", color: "#7eb8da", description: "El puente entre mundos. JavaScript mas alla del navegador." },
+            { id: 6, name: "DATABASES", icon: "🗄️", level: 65, xp: 6500, rarity: "common", color: "#ffd700", description: "Los archivos del conocimiento. Memoria eterna de lo que fue y sera." },
+            { id: 7, name: "GIT", icon: "🔀", level: 88, xp: 8800, rarity: "legendary", color: "#ff8c42", description: "El guardian del tiempo. Viajes a traves de las versiones del codigo." },
+            { id: 8, name: "UX/UI", icon: "🎯", level: 70, xp: 7000, rarity: "epic", color: "#ff6b9d", description: "El puente entre humano y maquina. Empatia convertida en pixels." }
+        ];
+
+        function getRarityClass(rarity) {
+            return rarity || 'common';
+        }
+
+        function renderCards() {
+            const grid = document.getElementById('cardsGrid');
+            grid.innerHTML = '';
+            
+            skills.forEach((skill, index) => {
+                const rarityClass = getRarityClass(skill.rarity);
+                
+                const card = document.createElement('div');
+                card.className = 'card ' + rarityClass;
+                card.style.animationDelay = (index * 0.1) + 's';
+                card.innerHTML = 
+                    '<div class="card-inner">' +
+                        '<div class="card-front">' +
+                            '<div class="card-shine"></div>' +
+                            '<div class="card-foil"></div>' +
+                            '<div class="card-glow"></div>' +
+                            '<div class="card-corner tl"></div>' +
+                            '<div class="card-corner tr"></div>' +
+                            '<div class="card-corner bl"></div>' +
+                            '<div class="card-corner br"></div>' +
+                            '<div class="card-rarity ' + rarityClass + '">' + skill.rarity + '</div>' +
+                            '<div class="card-art">' +
+                                '<div class="card-art-bg" style="background: radial-gradient(circle at center, ' + skill.color + '44 0%, transparent 70%)"></div>' +
+                                '<span class="card-icon" style="color: ' + skill.color + '">' + skill.icon + '</span>' +
+                            '</div>' +
+                            '<div class="card-content">' +
+                                '<div class="card-name">' + skill.name + '</div>' +
+                                '<div class="card-level">NIVEL ' + skill.level + '</div>' +
+                                '<div class="card-stats">' +
+                                    '<div class="card-stat">' +
+                                        '<div class="card-stat-value" style="color: ' + skill.color + '">' + skill.level + '</div>' +
+                                        '<div class="card-stat-label">Power</div>' +
+                                    '</div>' +
+                                    '<div class="card-stat">' +
+                                        '<div class="card-stat-value" style="color: ' + skill.color + '">' + (skill.xp / 100).toFixed(0) + '</div>' +
+                                        '<div class="card-stat-label">Costo</div>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="card-number">#' + String(skill.id).padStart(2, '0') + '</div>' +
+                        '</div>' +
+                        '<div class="card-back">' +
+                            '<div class="card-back-title">' + skill.name + '</div>' +
+                            '<p class="card-back-desc">' + skill.description + '</p>' +
+                            '<div class="card-back-stats">' +
+                                '<div class="back-stat">' +
+                                    '<div class="back-stat-value">' + skill.level + '</div>' +
+                                    '<div class="back-stat-label">Nivel</div>' +
+                                '</div>' +
+                                '<div class="back-stat">' +
+                                    '<div class="back-stat-value">' + skill.xp.toLocaleString() + '</div>' +
+                                    '<div class="back-stat-label">XP</div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>';
+                
+                grid.appendChild(card);
+                
+                setTimeout(function() {
+                    card.classList.add('reveal-animation');
+                }, index * 100);
+            });
+        }
+
+        function updateStats() {
+            const totalCards = skills.length;
+            const avgPower = Math.round(skills.reduce(function(acc, s) { return acc + s.level; }, 0) / totalCards);
+            const totalXP = skills.reduce(function(acc, s) { return acc + s.xp; }, 0);
+            
+            document.getElementById('totalCards').textContent = totalCards;
+            document.getElementById('avgPower').textContent = avgPower;
+            document.getElementById('totalXP').textContent = (totalXP / 1000).toFixed(0) + 'K';
+        }
+
+        renderCards();
+        updateStats();
+    </script>
+</body>
+</html>

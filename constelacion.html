@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONSTELACIÓN PERSONAL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Outfit:wght@200;300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --deep-space: #0a0a12;
+            --nebula-purple: #1a0a2e;
+            --star-white: #f0f0ff;
+            --star-gold: #ffd700;
+            --star-blue: #7eb8da;
+            --star-pink: #ff6b9d;
+            --star-orange: #ff8c42;
+            --constellation-line: rgba(126, 184, 218, 0.3);
+            --glow-soft: rgba(240, 240, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--deep-space);
+            min-height: 100vh;
+            font-family: 'Outfit', sans-serif;
+            color: var(--star-white);
+            overflow-x: hidden;
+        }
+
+        .universe {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .star-field {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .star {
+            position: absolute;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite;
+            animation-delay: var(--delay);
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: var(--base-opacity); transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .nebula {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+        }
+
+        .nebula-1 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--star-pink), transparent 70%);
+            top: -200px;
+            right: -200px;
+        }
+
+        .nebula-2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--star-blue), transparent 70%);
+            bottom: -150px;
+            left: -150px;
+        }
+
+        .nebula-3 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--nebula-purple), transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .constellation-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .content {
+            position: relative;
+            z-index: 2;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            padding: 3rem 0;
+            animation: fadeInDown 1s ease;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--star-white), var(--star-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-weight: 200;
+            font-size: 1.1rem;
+            opacity: 0.7;
+            letter-spacing: 0.3em;
+        }
+
+        .stars-container {
+            position: relative;
+            width: 100%;
+            height: 70vh;
+            min-height: 500px;
+            margin: 2rem 0;
+        }
+
+        .skill-star {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translate(-50%, -50%);
+        }
+
+        .skill-star:hover {
+            transform: translate(-50%, -50%) scale(1.3);
+            z-index: 100;
+        }
+
+        .star-core {
+            width: var(--size);
+            height: var(--size);
+            border-radius: 50%;
+            background: var(--color);
+            box-shadow: 
+                0 0 20px var(--color),
+                0 0 40px var(--color),
+                0 0 60px var(--color);
+            animation: pulse var(--pulse-duration) ease-in-out infinite;
+            animation-delay: var(--pulse-delay);
+        }
+
+        .star-orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: calc(var(--size) + 20px);
+            height: calc(var(--size) + 20px);
+            border: 1px solid var(--color);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.3;
+            animation: orbit-rotate 10s linear infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px var(--color), 0 0 40px var(--color); }
+            50% { box-shadow: 0 0 30px var(--color), 0 0 60px var(--color), 0 0 80px var(--color); }
+        }
+
+        @keyframes orbit-rotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .star-label {
+            position: absolute;
+            top: calc(var(--size) + 15px);
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            color: var(--star-white);
+            text-shadow: 0 0 10px var(--color);
+        }
+
+        .skill-star:hover .star-label,
+        .skill-star.active .star-label {
+            opacity: 1;
+        }
+
+        .info-panel {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            background: rgba(10, 10, 18, 0.9);
+            border: 1px solid rgba(126, 184, 218, 0.3);
+            padding: 1.5rem 2rem;
+            border-radius: 4px;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s ease;
+            max-width: 350px;
+            z-index: 10;
+        }
+
+        .info-panel.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .info-panel h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            color: var(--star-gold);
+        }
+
+        .info-panel p {
+            font-size: 0.95rem;
+            font-weight: 200;
+            line-height: 1.6;
+            opacity: 0.8;
+            margin-bottom: 1rem;
+        }
+
+        .info-stats {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .info-stat {
+            text-align: center;
+        }
+
+        .info-stat-value {
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--star-blue);
+        }
+
+        .info-stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            padding: 2rem 0;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease 0.5s both;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .total-stat {
+            text-align: center;
+        }
+
+        .total-stat-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3rem;
+            font-weight: 300;
+            color: var(--star-gold);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .total-stat-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            opacity: 0.6;
+        }
+
+        .constellation-name {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3rem, 10vw, 8rem);
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 5;
+            transition: opacity 1s ease;
+        }
+
+        .constellation-name.visible {
+            opacity: 0.15;
+        }
+
+        .tooltip {
+            position: fixed;
+            background: rgba(10, 10, 18, 0.95);
+            border: 1px solid var(--star-blue);
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 100;
+            max-width: 250px;
+        }
+
+        .tooltip.visible {
+            opacity: 1;
+        }
+
+        .scroll-hint {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            opacity: 0.4;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-10px); }
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 1rem;
+            }
+            
+            .stars-container {
+                height: 50vh;
+                min-height: 400px;
+            }
+            
+            .info-panel {
+                left: 1rem;
+                right: 1rem;
+                bottom: 1rem;
+                max-width: none;
+            }
+            
+            .stats-bar {
+                gap: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="universe">
+        <div class="star-field" id="starField"></div>
+        <div class="nebula nebula-1"></div>
+        <div class="nebula nebula-2"></div>
+        <div class="nebula nebula-3"></div>
+    </div>
+
+    <canvas class="constellation-canvas" id="constellationCanvas"></canvas>
+
+    <div class="constellation-name" id="constellationName">TU CONSTELACIÓN</div>
+
+    <div class="content">
+        <header class="header">
+            <h1>Constelación Personal</h1>
+            <p>Explora tu universo de habilidades</p>
+        </header>
+
+        <div class="stars-container" id="starsContainer"></div>
+
+        <div class="stats-bar">
+            <div class="total-stat">
+                <div class="total-stat-value" id="totalSkills">0</div>
+                <div class="total-stat-label">Estrellas</div>
+            </div>
+            <div class="total-stat">
+                <div class="total-stat-value" id="avgLevel">0</div>
+                <div class="total-stat-label">Nivel Promedio</div>
+            </div>
+            <div class="total-stat">
+                <div class="total-stat-value" id="totalXP">0</div>
+                <div class="total-stat-label">Puntos XP</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-panel" id="infoPanel">
+        <h3 id="panelTitle">SKILL</h3>
+        <p id="panelDescription">Descripción</p>
+        <div class="info-stats">
+            <div class="info-stat">
+                <div class="info-stat-value" id="panelLevel">0</div>
+                <div class="info-stat-label">Nivel</div>
+            </div>
+            <div class="info-stat">
+                <div class="info-stat-value" id="panelXP">0</div>
+                <div class="info-stat-label">XP</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+    <div class="scroll-hint">Explora tu universo</div>
+
+    <script>
+        const skills = [
+            { id: 1, name: "JavaScript", level: 85, xp: 8500, color: "#ffd700", size: 24 },
+            { id: 2, name: "React", level: 78, xp: 7800, color: "#7eb8da", size: 22 },
+            { id: 3, name: "Python", level: 72, xp: 7200, color: "#ff8c42", size: 20 },
+            { id: 4, name: "CSS/HTML", level: 92, xp: 9200, color: "#ff6b9d", size: 26 },
+            { id: 5, name: "Node.js", level: 68, xp: 6800, color: "#7eb8da", size: 18 },
+            { id: 6, name: "Databases", level: 65, xp: 6500, color: "#ffd700", size: 18 },
+            { id: 7, name: "Git", level: 88, xp: 8800, color: "#ff8c42", size: 24 },
+            { id: 8, name: "UX/UI", level: 70, xp: 7000, color: "#ff6b9d", size: 20 }
+        ];
+
+        const canvas = document.getElementById('constellationCanvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        let connections = [];
+        let activeStar = null;
+
+        function createStarField() {
+            const field = document.getElementById('starField');
+            const count = 200;
+            
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = (Math.random() * 2 + 1) + 'px';
+                star.style.height = star.style.width;
+                star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+                star.style.setProperty('--delay', (Math.random() * 5) + 's');
+                star.style.setProperty('--base-opacity', (Math.random() * 0.5 + 0.3));
+                field.appendChild(star);
+            }
+        }
+
+        function positionSkills() {
+            const container = document.getElementById('starsContainer');
+            const rect = container.getBoundingClientRect();
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const radius = Math.min(centerX, centerY) * 0.7;
+            
+            skills.forEach((skill, index) => {
+                const angle = (index / skills.length) * Math.PI * 2 - Math.PI / 2;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                
+                skill.x = x;
+                skill.y = y;
+            });
+        }
+
+        function renderSkills() {
+            const container = document.getElementById('starsContainer');
+            container.innerHTML = '';
+            
+            skills.forEach((skill, index) => {
+                const starEl = document.createElement('div');
+                starEl.className = 'skill-star';
+                starEl.style.left = skill.x + 'px';
+                starEl.style.top = skill.y + 'px';
+                starEl.style.setProperty('--size', skill.size + 'px');
+                starEl.style.setProperty('--color', skill.color);
+                starEl.style.setProperty('--pulse-duration', (2 + Math.random()) + 's');
+                starEl.style.setProperty('--pulse-delay', (Math.random() * 2) + 's');
+                starEl.style.animationDelay = (index * 0.15) + 's';
+                
+                starEl.innerHTML = `
+                    <div class="star-core"></div>
+                    <div class="star-orbit"></div>
+                    <span class="star-label">${skill.name}</span>
+                `;
+                
+                starEl.addEventListener('mouseenter', (e) => showInfo(skill, e));
+                starEl.addEventListener('mouseleave', hideInfo);
+                starEl.addEventListener('click', () => toggleStar(skill));
+                
+                container.appendChild(starEl);
+            });
+            
+            drawConstellation();
+        }
+
+        function drawConstellation() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const container = document.getElementById('starsContainer');
+            const rect = container.getBoundingClientRect();
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.strokeStyle = 'rgba(126, 184, 218, 0.2)';
+            ctx.lineWidth = 1;
+            
+            skills.forEach((skill, i) => {
+                const nextSkill = skills[(i + 1) % skills.length];
+                
+                ctx.beginPath();
+                ctx.moveTo(rect.left + skill.x, rect.top + skill.y);
+                ctx.lineTo(rect.left + nextSkill.x, rect.top + nextSkill.y);
+                ctx.stroke();
+            });
+            
+            skills.forEach((skill, i) => {
+                const nextSkill = skills[(i + 2) % skills.length];
+                
+                ctx.beginPath();
+                ctx.moveTo(rect.left + skill.x, rect.top + skill.y);
+                ctx.lineTo(rect.left + nextSkill.x, rect.top + nextSkill.y);
+                ctx.stroke();
+            });
+        }
+
+        function showInfo(skill, e) {
+            const panel = document.getElementById('infoPanel');
+            const tooltip = document.getElementById('tooltip');
+            
+            document.getElementById('panelTitle').textContent = skill.name;
+            document.getElementById('panelTitle').style.color = skill.color;
+            document.getElementById('panelDescription').textContent = getSkillDescription(skill.name);
+            document.getElementById('panelLevel').textContent = skill.level;
+            document.getElementById('panelXP').textContent = skill.xp.toLocaleString();
+            
+            panel.classList.add('visible');
+        }
+
+        function hideInfo() {
+            if (!activeStar) {
+                document.getElementById('infoPanel').classList.remove('visible');
+            }
+        }
+
+        function toggleStar(skill) {
+            const container = document.getElementById('starsContainer');
+            const starElements = container.querySelectorAll('.skill-star');
+            
+            if (activeStar && activeStar.id === skill.id) {
+                activeStar = null;
+                starElements.forEach(el => el.classList.remove('active'));
+            } else {
+                activeStar = skill;
+                starElements.forEach((el, i) => {
+                    el.classList.toggle('active', skills[i].id === skill.id);
+                });
+            }
+        }
+
+        function getSkillDescription(name) {
+            const descriptions = {
+                "JavaScript": "El lenguaje de la web. Dinámico, versátil y esencial para crear experiencias interactivas modernas.",
+                "React": "La biblioteca más popular para construir interfaces de usuario componentes y reactivas.",
+                "Python": "Versátil y poderoso. Desde backend hasta ciencia de datos e inteligencia artificial.",
+                "CSS/HTML": "Los fundamentos de todo lo que ves en la web. Diseño y estructura combinados.",
+                "Node.js": "JavaScript del lado del servidor. Construye APIs rápidas y escalables.",
+                "Databases": "El arte de organizar y gestionar datos. La memoria de tus aplicaciones.",
+                "Git": "Control de versiones y colaboración. Esencial para todo proyecto moderno.",
+                "UX/UI": "El puente entre tecnología y personas. Diseñar experiencias que importan."
+            };
+            return descriptions[name] || "Una habilidad valiosa en tu arsenal.";
+        }
+
+        function updateStats() {
+            document.getElementById('totalSkills').textContent = skills.length;
+            document.getElementById('avgLevel').textContent = Math.round(skills.reduce((a, s) => a + s.level, 0) / skills.length);
+            document.getElementById('totalXP').textContent = skills.reduce((a, s) => a + s.xp, 0).toLocaleString();
+        }
+
+        function showConstellationName() {
+            setTimeout(() => {
+                document.getElementById('constellationName').classList.add('visible');
+            }, 1500);
+        }
+
+        window.addEventListener('resize', () => {
+            positionSkills();
+            renderSkills();
+        });
+
+        createStarField();
+        positionSkills();
+        renderSkills();
+        updateStats();
+        showConstellationName();
+
+        setTimeout(() => {
+            document.querySelector('.scroll-hint').style.opacity = '0';
+        }, 5000);
+    </script>
+</body>
+</html>

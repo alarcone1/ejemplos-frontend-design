@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCADE DE HABILIDADES</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-pink: #ff2a6d;
+            --neon-blue: #05d9e8;
+            --neon-purple: #d300c5;
+            --neon-green: #39ff14;
+            --dark-bg: #0a0a0f;
+            --screen-bg: #1a1a2e;
+            --crt-glow: rgba(5, 217, 232, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--dark-bg);
+            min-height: 100vh;
+            font-family: 'VT323', monospace;
+            overflow-x: hidden;
+            color: var(--neon-blue);
+        }
+
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 0, 0, 0.15),
+                    rgba(0, 0, 0, 0.15) 1px,
+                    transparent 1px,
+                    transparent 2px
+                );
+        }
+
+        .crt-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%);
+        }
+
+        .intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 500;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .intro-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 500;
+            transition: opacity 0.5s ease;
+        }
+
+        .arcade-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .intro-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: clamp(1.5rem, 5vw, 3rem);
+            color: var(--neon-pink);
+            text-shadow: 
+                0 0 10px var(--neon-pink),
+                0 0 20px var(--neon-pink),
+                0 0 40px var(--neon-pink);
+            animation: flicker 2s infinite;
+            text-align: center;
+            padding: 0 1rem;
+        }
+
+        .intro-subtitle {
+            font-size: 1.5rem;
+            color: var(--neon-blue);
+            margin-top: 2rem;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            92% { opacity: 1; }
+            93% { opacity: 0.8; }
+            94% { opacity: 1; }
+            96% { opacity: 0.9; }
+            97% { opacity: 1; }
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .arcade-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .arcade-container.visible {
+            opacity: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: clamp(0.8rem, 3vw, 1.5rem);
+            color: var(--neon-green);
+            text-shadow: 0 0 10px var(--neon-green);
+            margin-bottom: 1rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: var(--screen-bg);
+            border: 2px solid var(--neon-blue);
+            padding: 0.75rem 1.5rem;
+            font-size: 1.2rem;
+            position: relative;
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+        }
+
+        .stat::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: var(--neon-blue);
+            z-index: -1;
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+            opacity: 0.3;
+        }
+
+        .stat-label {
+            color: var(--neon-pink);
+            margin-right: 0.5rem;
+        }
+
+        .stat-value {
+            color: var(--neon-green);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .skill-card {
+            background: var(--screen-bg);
+            border: 3px solid var(--neon-purple);
+            padding: 1.5rem;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .skill-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 40%, var(--neon-purple) 200%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: var(--neon-pink);
+            box-shadow: 
+                0 0 20px var(--neon-pink),
+                inset 0 0 20px rgba(255, 42, 109, 0.1);
+        }
+
+        .skill-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .skill-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .skill-level {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--neon-green);
+            background: var(--dark-bg);
+            padding: 0.25rem 0.5rem;
+            border: 1px solid var(--neon-green);
+        }
+
+        .skill-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            color: var(--neon-blue);
+            margin-bottom: 0.75rem;
+            text-shadow: 0 0 5px var(--neon-blue);
+        }
+
+        .skill-description {
+            font-size: 1.1rem;
+            color: #aaa;
+            line-height: 1.4;
+            margin-bottom: 1rem;
+        }
+
+        .skill-progress {
+            height: 8px;
+            background: var(--dark-bg);
+            border: 1px solid var(--neon-blue);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skill-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-pink), var(--neon-purple));
+            transition: width 1s ease;
+            box-shadow: 0 0 10px var(--neon-pink);
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .skill-tag {
+            font-size: 0.8rem;
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            padding: 0.2rem 0.5rem;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 600;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--screen-bg);
+            border: 3px solid var(--neon-pink);
+            padding: 2rem;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2rem;
+            color: var(--neon-pink);
+            cursor: pointer;
+            transition: color 0.3s ease;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--neon-green);
+        }
+
+        .modal-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            color: var(--neon-pink);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px var(--neon-pink);
+        }
+
+        .modal-description {
+            font-size: 1.2rem;
+            color: #ccc;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .modal-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .modal-stat {
+            background: var(--dark-bg);
+            border: 1px solid var(--neon-blue);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .modal-stat-label {
+            font-size: 0.9rem;
+            color: var(--neon-purple);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-stat-value {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2rem;
+            color: var(--neon-green);
+        }
+
+        .sound-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--screen-bg);
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 0.75rem 1rem;
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .sound-toggle:hover {
+            background: var(--neon-blue);
+            color: var(--dark-bg);
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            animation: particleFloat 10s infinite linear;
+            opacity: 0.5;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--neon-blue);
+            opacity: 0.1;
+            animation: scanline 4s linear infinite;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        @keyframes scanline {
+            0% { top: -4px; }
+            100% { top: 100%; }
+        }
+
+        .power-bar {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 200px;
+            background: var(--screen-bg);
+            border: 2px solid var(--neon-blue);
+            z-index: 100;
+        }
+
+        .power-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, var(--neon-green), var(--neon-blue));
+            transition: height 0.5s ease;
+        }
+
+        .power-label {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: var(--neon-green);
+            white-space: nowrap;
+        }
+
+        @media (max-width: 600px) {
+            .arcade-container {
+                padding: 1rem;
+            }
+            
+            .stats-bar {
+                gap: 1rem;
+            }
+            
+            .stat {
+                font-size: 1rem;
+                padding: 0.5rem 1rem;
+            }
+            
+            .power-bar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="crt-overlay"></div>
+    <div class="scanline"></div>
+    <div class="particles" id="particles"></div>
+    
+    <div class="power-bar">
+        <span class="power-label">POWER</span>
+        <div class="power-fill" id="powerFill" style="height: 75%"></div>
+    </div>
+
+    <div class="intro-screen" id="introScreen">
+        <h1 class="intro-title">ARCADE DE HABILIDADES</h1>
+        <p class="intro-subtitle">INSERT COIN TO START</p>
+    </div>
+
+    <div class="arcade-container" id="arcadeContainer">
+        <header class="header">
+            <h1>★ TU PANEL DE PODER ★</h1>
+            <div class="stats-bar">
+                <div class="stat">
+                    <span class="stat-label">SKILLS:</span>
+                    <span class="stat-value" id="totalSkills">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">NIVEL:</span>
+                    <span class="stat-value" id="avgLevel">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">PUNTOS:</span>
+                    <span class="stat-value" id="totalPoints">0</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid-container" id="skillsGrid"></div>
+    </div>
+
+    <div class="modal" id="skillModal">
+        <div class="modal-content">
+            <span class="modal-close" id="modalClose">×</span>
+            <h2 class="modal-title" id="modalTitle">SKILL NAME</h2>
+            <p class="modal-description" id="modalDescription">Description</p>
+            <div class="modal-stats">
+                <div class="modal-stat">
+                    <div class="modal-stat-label">NIVEL</div>
+                    <div class="modal-stat-value" id="modalLevel">1</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="modal-stat-label">EXPERIENCIA</div>
+                    <div class="modal-stat-value" id="modalXP">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="sound-toggle" id="soundToggle">🔇 SFX</button>
+
+    <script>
+        const skills = [
+            {
+                id: 1,
+                name: "JAVASCRIPT",
+                icon: "⚡",
+                description: "Lenguaje de programación dinámico para la web",
+                level: 85,
+                xp: 8500,
+                tags: ["ES6+", "Async", "DOM"]
+            },
+            {
+                id: 2,
+                name: "REACT",
+                icon: "⚛️",
+                description: "Biblioteca JavaScript para interfaces de usuario",
+                level: 78,
+                xp: 7800,
+                tags: ["Hooks", "Redux", "Next.js"]
+            },
+            {
+                id: 3,
+                name: "PYTHON",
+                icon: "🐍",
+                description: "Lenguaje versatile para backend y data science",
+                level: 72,
+                xp: 7200,
+                tags: ["Django", "FastAPI", "ML"]
+            },
+            {
+                id: 4,
+                name: "CSS/HTML",
+                icon: "🎨",
+                description: "Fundamentos del diseño web moderno",
+                level: 92,
+                xp: 9200,
+                tags: ["Flexbox", "Grid", "Animations"]
+            },
+            {
+                id: 5,
+                name: "NODE.JS",
+                icon: "🟢",
+                description: "JavaScript del lado del servidor",
+                level: 68,
+                xp: 6800,
+                tags: ["Express", "REST", "GraphQL"]
+            },
+            {
+                id: 6,
+                name: "DATABASES",
+                icon: "🗄️",
+                description: "Gestión y diseño de bases de datos",
+                level: 65,
+                xp: 6500,
+                tags: ["PostgreSQL", "MongoDB", "Redis"]
+            },
+            {
+                id: 7,
+                name: "GIT",
+                icon: "🔀",
+                description: "Control de versiones y colaboración",
+                level: 88,
+                xp: 8800,
+                tags: ["GitHub", "Branching", "CI/CD"]
+            },
+            {
+                id: 8,
+                name: "UX/UI",
+                icon: "🎯",
+                description: "Diseño de experiencias de usuario",
+                level: 70,
+                xp: 7000,
+                tags: ["Figma", "Research", "Prototyping"]
+            }
+        ];
+
+        let audioContext = null;
+        let soundEnabled = false;
+
+        function playSound(freq = 440, duration = 0.1, type = 'square') {
+            if (!soundEnabled || !audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function playIntroSound() {
+            if (!soundEnabled || !audioContext) return;
+            
+            const notes = [262, 330, 392, 523];
+            notes.forEach((freq, i) => {
+                setTimeout(() => playSound(freq, 0.2, 'square'), i * 150);
+            });
+        }
+
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (8 + Math.random() * 4) + 's';
+                particle.style.background = Math.random() > 0.5 ? 'var(--neon-blue)' : 'var(--neon-pink)';
+                container.appendChild(particle);
+            }
+        }
+
+        function updateStats() {
+            const totalSkills = skills.length;
+            const avgLevel = Math.round(skills.reduce((acc, s) => acc + s.level, 0) / totalSkills);
+            const totalPoints = skills.reduce((acc, s) => acc + s.xp, 0);
+            
+            document.getElementById('totalSkills').textContent = totalSkills;
+            document.getElementById('avgLevel').textContent = avgLevel;
+            document.getElementById('totalPoints').textContent = totalPoints.toLocaleString();
+            
+            const powerFill = document.getElementById('powerFill');
+            powerFill.style.height = avgLevel + '%';
+        }
+
+        function renderSkills() {
+            const grid = document.getElementById('skillsGrid');
+            grid.innerHTML = '';
+            
+            skills.forEach((skill, index) => {
+                const card = document.createElement('div');
+                card.className = 'skill-card';
+                card.style.animationDelay = (index * 0.1) + 's';
+                card.innerHTML = `
+                    <span class="skill-level">LV${skill.level}</span>
+                    <span class="skill-icon">${skill.icon}</span>
+                    <h3 class="skill-title">${skill.name}</h3>
+                    <p class="skill-description">${skill.description}</p>
+                    <div class="skill-progress">
+                        <div class="skill-progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="skill-tags">
+                        ${skill.tags.map(tag => `<span class="skill-tag">${tag}</span>`).join('')}
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => openModal(skill));
+                card.addEventListener('mouseenter', () => playSound(600 + index * 50, 0.05));
+                
+                grid.appendChild(card);
+                
+                setTimeout(() => {
+                    card.querySelector('.skill-progress-fill').style.width = skill.level + '%';
+                }, 300 + index * 100);
+            });
+        }
+
+        function openModal(skill) {
+            playSound(800, 0.15, 'sawtooth');
+            
+            document.getElementById('modalTitle').textContent = skill.name;
+            document.getElementById('modalDescription').textContent = skill.description;
+            document.getElementById('modalLevel').textContent = skill.level;
+            document.getElementById('modalXP').textContent = skill.xp.toLocaleString();
+            
+            document.getElementById('skillModal').classList.add('active');
+        }
+
+        function closeModal() {
+            playSound(400, 0.1, 'square');
+            document.getElementById('skillModal').classList.remove('active');
+        }
+
+        document.getElementById('modalClose').addEventListener('click', closeModal);
+        document.getElementById('skillModal').addEventListener('click', (e) => {
+            if (e.target.id === 'skillModal') closeModal();
+        });
+
+        document.getElementById('soundToggle').addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('soundToggle');
+            btn.textContent = soundEnabled ? '🔊 SFX' : '🔇 SFX';
+            
+            if (soundEnabled && !audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        function startIntro() {
+            setTimeout(() => {
+                document.getElementById('introScreen').classList.add('hidden');
+                document.getElementById('arcadeContainer').classList.add('visible');
+                playIntroSound();
+            }, 2500);
+        }
+
+        createParticles();
+        updateStats();
+        renderSkills();
+        
+        document.addEventListener('click', () => {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }, { once: true });
+        
+        startIntro();
+    </script>
+</body>
+</html>
