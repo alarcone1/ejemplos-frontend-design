@@ -99,7 +99,7 @@ open constelacion.html
 
 ## Repositorio
 
-🔗 [Ver en GitHub](https://skills.sh/anthropics/skills/frontend-design)
+🔗 [Ver en GitHub](https://github.com/alarcone1/ejemplos-frontend-design)
 
 ¡Siéntete libre de clonar, bifurcar y contribuir!
 
